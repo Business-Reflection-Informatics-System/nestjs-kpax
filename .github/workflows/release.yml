@@ -1,5 +1,9 @@
 name: Release
 
+# One tag releases every language:
+#   git tag -a v0.2.0 -m v0.2.0 && git push origin v0.2.0
+# (or draft a release with a new tag in the GitHub UI; the assets are attached either way)
+
 on:
   push:
     tags: ['v*']
@@ -8,66 +12,143 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  versions:
+    name: Versions match the tag
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - run: |
+          set -e
+          want="${GITHUB_REF_NAME#v}"
+          node=$(jq -r .version node/package.json)
+          py=$(sed -nE 's/^version = "(.*)"/\1/p' python/pyproject.toml)
+          pyinit=$(sed -nE 's/^__version__ = "(.*)"/\1/p' python/src/kpax/__init__.py)
+          dotnet=$(sed -nE 's#.*<Version>(.*)</Version>.*#\1#p' dotnet/src/BizReflex.Kpax/BizReflex.Kpax.csproj)
+          echo "tag=$want node=$node python=$py/$pyinit dotnet=$dotnet"
+          for v in "$node" "$py" "$pyinit" "$dotnet"; do
+            [ "$v" = "$want" ] || { echo "version $v does not match tag $want"; exit 1; }
+          done
 
+  node:
+    needs: versions
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: node } }
+    steps:
+      - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
-        with:
-          node-version: 20
-          cache: npm
+        with: { node-version: 20, cache: npm, cache-dependency-path: node/package-lock.json }
+      - run: npm ci && npm run typecheck && npm run lint && npm test
+      - run: npm pack
+      - uses: actions/upload-artifact@v4
+        with: { name: node, path: node/bizreflex-nestjs-kpax-*.tgz }
 
-      - name: Tag must match package.json version
-        run: |
-          PKG="v$(node -p "require('./package.json').version")"
-          if [ "$PKG" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match package.json $PKG"; exit 1
-          fi
+  python:
+    needs: versions
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: python } }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with: { python-version: '3.12' }
+      - run: pip install -e ".[dev]" build && pytest -q && ruff check src tests && mypy
+      - run: python -m build
+      - uses: actions/upload-artifact@v4
+        with: { name: python, path: python/dist/* }
 
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm test
+  dotnet:
+    needs: versions
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: dotnet } }
+    env: { DOTNET_NOLOGO: true }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with: { dotnet-version: '8.0.x' }
+      - run: dotnet build BizReflex.Kpax.sln -c Release
+      - run: dotnet run --project tests/BizReflex.Kpax.Tests -c Release --no-build
+      - run: dotnet pack src/BizReflex.Kpax -c Release --no-build -o out
+      - uses: actions/upload-artifact@v4
+        with: { name: dotnet, path: dotnet/out/*.nupkg }
 
-      - name: Pack
-        id: pack
-        run: |
-          npm pack
-          FILE="$(ls bizreflex-nestjs-kpax-*.tgz)"
-          echo "file=$FILE" >> "$GITHUB_OUTPUT"
-          echo "sha=$(sha512sum "$FILE" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
-
-      - name: Release notes from CHANGELOG
+  php:
+    needs: versions
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: php } }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.3', extensions: 'curl, json', tools: composer, coverage: none }
+      - run: composer dump-autoload && php tests/run.php
+      - name: Zip the package (no tests, no vendor)
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          awk -v v="$VERSION" '
-            $0 ~ "^## "v" " || $0 ~ "^## "v"$" {on=1; next}
-            on && /^## / {exit}
-            on {print}
-          ' CHANGELOG.md > notes.md
-          cat >> notes.md <<EOF
+          zip -r "bizreflex-kpax-php-${VERSION}.zip" src composer.json README.md LICENSE
+      - uses: actions/upload-artifact@v4
+        with: { name: php, path: php/bizreflex-kpax-php-*.zip }
 
-          ### Install
+  go:
+    needs: versions
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: go } }
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with: { go-version: stable, cache: false }
+      - run: go vet ./... && go test -race -count=1 ./...
 
-          \`\`\`bash
-          npm install https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/${{ steps.pack.outputs.file }}
-          \`\`\`
+  release:
+    needs: [node, python, dotnet, php, go]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v5
+        with: { path: assets, merge-multiple: true }
 
-          SHA-512: \`${{ steps.pack.outputs.sha }}\`
-          EOF
+      - name: Release notes
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          T="$GITHUB_REF_NAME"
+          R="https://github.com/${GITHUB_REPOSITORY}/releases/download/${T}"
+          {
+            awk -v v="$V" '$0 ~ "^## "v"( |$)" {on=1; next} on && /^## / {exit} on {print}' CHANGELOG.md
+            echo
+            echo "### Install"
+            echo
+            echo "| Language | |"
+            echo "|---|---|"
+            echo "| Node / NestJS | \`npm install ${R}/bizreflex-nestjs-kpax-${V}.tgz\` |"
+            echo "| Python | \`pip install ${R}/bizreflex_kpax-${V}-py3-none-any.whl\` |"
+            echo "| Go | \`go get github.com/${GITHUB_REPOSITORY}/go@${T}\` |"
+            echo "| .NET | \`BizReflex.Kpax.${V}.nupkg\` (local feed; see dotnet/README.md) |"
+            echo "| PHP | \`bizreflex-kpax-php-${V}.zip\` (Composer package repo; see php/README.md) |"
+            echo
+            echo "### SHA-256"
+            echo
+            echo '```'
+            (cd assets && sha256sum *)
+            echo '```'
+          } > notes.md
+          cat notes.md
 
-      - name: Create or update GitHub Release
+      - name: Create or update the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Works whether the tag was pushed from git or the release was drafted in the GitHub UI.
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "${{ steps.pack.outputs.file }}" --clobber
+            gh release upload "$GITHUB_REF_NAME" assets/* --clobber
             gh release edit "$GITHUB_REF_NAME" --notes-file notes.md
           else
-            gh release create "$GITHUB_REF_NAME" "${{ steps.pack.outputs.file }}" \
-              --title "$GITHUB_REF_NAME" \
-              --notes-file notes.md \
-              --verify-tag
+            gh release create "$GITHUB_REF_NAME" assets/* --title "$GITHUB_REF_NAME" --notes-file notes.md --verify-tag
+          fi
+
+      - name: Tag the Go module (go/vX.Y.Z)
+        run: |
+          GO_TAG="go/${GITHUB_REF_NAME}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --tags origin "refs/tags/${GO_TAG}" >/dev/null; then
+            echo "${GO_TAG} already exists"
+          else
+            git tag -a "${GO_TAG}" -m "${GO_TAG}" "${GITHUB_SHA}"
+            git push origin "${GO_TAG}"
           fi

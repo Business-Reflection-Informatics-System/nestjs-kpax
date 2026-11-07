@@ -1,0 +1,50 @@
+name: CI · Python
+
+on:
+  push:
+    paths: ['python/**', 'fixtures/**', '.github/workflows/ci-python.yml']
+  pull_request:
+    paths: ['python/**', 'fixtures/**', '.github/workflows/ci-python.yml']
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: python
+
+jobs:
+  test:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10', '3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+      - run: ruff check src tests
+      - run: ruff format --check src tests
+      - if: matrix.python == '3.12'
+        run: mypy
+
+  build:
+    name: Build wheel + sdist
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install build && python -m build
+      - name: Install the wheel in a clean venv
+        run: |
+          python -m venv /tmp/v
+          /tmp/v/bin/pip install dist/*.whl
+          /tmp/v/bin/python -c "import kpax; print(kpax.__version__)"

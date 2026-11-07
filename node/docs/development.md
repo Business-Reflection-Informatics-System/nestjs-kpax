@@ -38,10 +38,10 @@ and 22, and on NestJS 9 and 10.
 
 ## Regenerating types after a KPAX upgrade
 
-KPAX's spec is not redistributed in this repo (see [`openapi/README.md`](../openapi/README.md)).
+KPAX's spec is not redistributed in this repo (see [`openapi/README.md`](../../openapi/README.md)).
 
 1. Log in to a KPAX instance, open `https://<instance>.kpax.cloud/api/docs?api-docs.json`,
-   save it as `openapi/kpax-openapi.json` (git-ignored).
+   save it as `openapi/kpax-openapi.json` at the repo root (git-ignored).
 2. `npm run generate:types && npm run typecheck && npm test`.
 3. The generator strips descriptions and examples, so the committed file is type structure
    only. Compile errors point at helpers whose endpoints changed.

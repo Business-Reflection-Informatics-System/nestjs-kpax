@@ -1,0 +1,3 @@
+{ "id": 42, "parent_type": "account", "parent_id": 12, "manufacturer": "Kyocera", "model": "TASKalfa 2554ci", "serial_number": "SN0000000042", "serial_number_origin": "SN0000000042", "last_check": "2026-11-01 08:00:00",
+  "meters": { "engine_count": { "value": 152340 }, "total_mono": { "value": 120001 }, "total_color": { "value": 32339 } },
+  "supplies": { "black_cartridge": { "value": 35 } } }

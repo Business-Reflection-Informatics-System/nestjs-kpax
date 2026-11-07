@@ -1,122 +1,72 @@
-# @bizreflex/nestjs-kpax
+# KPAX API clients
 
-[![CI](https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/actions/workflows/ci.yml/badge.svg)](https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+Clients for the **KPAX API v1** (printer fleet / managed print services monitoring) in five
+languages, maintained by [BizReflex](https://github.com/Business-Reflection-Informatics-System).
 
-NestJS module for the **KPAX API v1** (printer fleet / managed print services monitoring).
-
-- **Typed client** for all KPAX v1 operations, plus helpers for devices, serial lookup,
-  meters, volumes, supplies and alert history.
-- **OAuth2 client credentials**: tokens cached, refreshed early, shared by concurrent calls.
-- **Connections in your database.** Register KPAX instances at runtime (e.g. from an admin
-  screen). Every process loads all active ones at boot and keeps them in sync — no
-  restart to add, rotate or disable an instance.
-- **Resilient**: honours KPAX rate-limit headers, retries transient failures, never
-  re-sends a POST that may have been processed.
-- NestJS 9 and 10, Node 18+. Runtime dependencies: only NestJS + axios (as peers).
-
-```ts
-@Injectable()
-export class PrinterService {
-  constructor(private readonly kpax: KpaxConnectionRegistry) {}
-
-  async findPrinter(connectionId: number, serial: string) {
-    const client = await this.kpax.get(connectionId);
-    return client.findDeviceBySerial(serial); // exact match or null
-  }
-}
-```
+| Language | Package | Folder | Highlights |
+|---|---|---|---|
+| Node / **NestJS** | `@bizreflex/nestjs-kpax` | [`node/`](node) | Nest module, DB-backed registry of KPAX connections that change at runtime, typed `call()` over every endpoint |
+| **Python** 3.10+ | `bizreflex-kpax` | [`python/`](python) | `httpx`, thread-safe, typed |
+| **Go** 1.23+ | `github.com/Business-Reflection-Informatics-System/nestjs-kpax/go` | [`go/`](go) | stdlib only, `context`, range-over-func iterators |
+| **.NET** 8+ | `BizReflex.Kpax` | [`dotnet/`](dotnet) | no dependencies, async, `IAsyncEnumerable` |
+| **PHP** 8.1+ | `bizreflex/kpax` | [`php/`](php) | no Composer dependencies, pluggable transport, generators |
 
 > Not affiliated with KPAX. You need your own KPAX instance and an API client
 > (client id/secret) from its API panel.
 
-## Install
+## What every client does
 
-Releases are published as tarballs on
-[GitHub Releases](https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/releases):
+Same behaviour everywhere, defined in the [client behaviour spec](docs/client-behavior.md)
+and tested in each language against the shared [fixtures](fixtures):
+
+- OAuth2 **client credentials**; one cached token, refreshed before expiry, shared by
+  concurrent callers; one retry with a fresh token on 401.
+- **Rate limits**: honours `Retry-After` / `X-RateLimit-Reset`, holds requests when
+  `X-RateLimit-Remaining` hits 0.
+- **Retries**: 5xx and network errors with exponential backoff for GET/PUT/DELETE; a POST is
+  never re-sent after a 5xx or network error.
+- **Pagination** helpers, typed models (accounts, devices, alerts, server status), and
+  helpers for serial lookup (exact match), fleet-wide attribute search, page volumes,
+  history, toner cycles and alert history.
+- A generic request method for any endpoint, and a connection test that never throws.
+
+## Install (v0.1.0)
+
+Each `v*` tag publishes all packages as assets on
+[GitHub Releases](https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/releases).
 
 ```bash
+# Node / NestJS
 npm install https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/releases/download/v0.1.0/bizreflex-nestjs-kpax-0.1.0.tgz
+# Python
+pip install https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/releases/download/v0.1.0/bizreflex_kpax-0.1.0-py3-none-any.whl
+# Go
+go get github.com/Business-Reflection-Informatics-System/nestjs-kpax/go@v0.1.0
 ```
 
-No git or GitHub token is needed at install time, and the lockfile pins the tarball's
-integrity hash. Peer dependencies: `@nestjs/common`, `@nestjs/axios`, `axios`, `rxjs`,
-`reflect-metadata`.
+.NET (`BizReflex.Kpax.0.1.0.nupkg`) and PHP (`bizreflex-kpax-php-0.1.0.zip`): see
+[dotnet/README.md](dotnet/README.md#install) and [php/README.md](php/README.md#install).
 
-## Quick start
+## Repository layout
 
-**1. A table for connections** — [example knex migration](examples/knex-migration/20260101000000_create_kpax_connections_table.js)
-(PostgreSQL / SQLite).
-
-**2. A store.** With knex, extend the bundled one and plug in your encryption:
-
-```ts
-@Injectable()
-export class KpaxConnectionDbStore extends KnexKpaxConnectionStore {
-  constructor(@Inject(KNEX) knex: Knex, cipher: SecretCipher) {
-    super({
-      knex: () => knex,
-      encrypt: (plain) => cipher.encrypt(plain),
-      decrypt: (payload) => cipher.decrypt(payload),
-    });
-  }
-}
+```
+docs/          client-behavior.md (the spec), kpax-api-notes.md (auth, scopes, hierarchy, dates)
+fixtures/      JSON responses every client's tests serve from a mock KPAX
+openapi/       where KPAX's spec goes locally to regenerate Node types (not committed)
+node/ python/ go/ dotnet/ php/
+.github/       CI per language (path-filtered) and one release workflow
 ```
 
-**3. Register the module once:**
+## Releasing
 
-```ts
-KpaxModule.forRootAsync({
-  isGlobal: true,
-  imports: [KpaxCryptoModule],          // whatever the store needs
-  connectionStore: KpaxConnectionDbStore,
-  useFactory: () => ({ registry: { syncIntervalMs: 60_000 } }),
-});
-```
-
-**4. Use it anywhere:**
-
-```ts
-const client = await registry.get(connectionId);
-for await (const device of client.iterateDevices()) { /* every page */ }
-```
-
-A complete, tested example (store, AES-GCM cipher, admin CRUD controller with connection
-testing) is in [examples/nestjs-admin](examples/nestjs-admin).
-
-No database? Skip the store and use
-`KpaxClientFactory.forConnection({ host, clientId, clientSecret })`.
-
-## Documentation
-
-| Guide | What's in it |
-|---|---|
-| [Integration guide](docs/integration-guide.md) | Table, store, module, admin endpoints, multi-process deployments, rollout |
-| [Architecture](docs/architecture.md) | Components, boot sequence, multi-process sync, token handling |
-| [Connection registry](docs/connection-registry.md) | Store contract, registry API, sync semantics |
-| [Client API](docs/client-api.md) | Every client method, typed `call()`, pagination, recipes |
-| [Errors & resilience](docs/errors-and-resilience.md) | Error types, retries, rate limits, mapping to HTTP |
-| [KPAX API notes](docs/kpax-api-notes.md) | Auth, scopes, hierarchy, dates, spec quirks |
-| [Development](docs/development.md) | Build, test, regenerate types, release |
-
-## Module options
-
-All optional. Connection details are never configured here.
-
-| Option | Default | |
-|---|---|---|
-| `defaultScopes` | read scopes ([list](docs/kpax-api-notes.md#scopes)) | Requested when a connection has none |
-| `timeoutMs` | `30000` | Per HTTP attempt |
-| `maxRetries` | `4` | For 429 / 5xx / network errors |
-| `baseDelayMs` / `maxDelayMs` | `500` / `60000` | Backoff base and cap (also caps `Retry-After`) |
-| `tokenRefreshSkewSeconds` | `60` | Refresh tokens this long before expiry |
-| `maxCachedConnections` | `50` | Ad-hoc `forConnection()` clients kept |
-| `registry.loadOnBoot` | `true` | Load all active connections at start-up |
-| `registry.syncIntervalMs` | `60000` | Re-check the store for changes from other processes; `0` = off |
-| `registry.loadOnMiss` | `true` | `get(id)` reads an unknown id from the store once |
-| `registry.failOnBootError` | `false` | Abort start-up if the initial load fails |
-
-Module extras: `isGlobal` (default `false`), `connectionStore` (class implementing `KpaxConnectionStore`).
+1. Set the same version in `node/package.json`, `python/pyproject.toml`,
+   `python/src/kpax/__init__.py` and `dotnet/src/BizReflex.Kpax/BizReflex.Kpax.csproj`;
+   add a `CHANGELOG.md` entry; merge to `main`.
+2. `git tag -a vX.Y.Z -m vX.Y.Z && git push origin vX.Y.Z` (or draft a release with a new tag
+   in the GitHub UI).
+3. The Release workflow checks the versions match the tag, tests every language, attaches the
+   Node tarball, Python wheel/sdist, NuGet package and PHP zip to the release, and tags the Go
+   module as `go/vX.Y.Z`.
 
 ## License
 

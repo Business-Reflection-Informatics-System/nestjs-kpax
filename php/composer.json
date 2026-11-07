@@ -1,0 +1,22 @@
+{
+    "name": "bizreflex/kpax",
+    "description": "Client for the KPAX API v1: OAuth2 client credentials, retries and rate limits, pagination, device helpers. No dependencies.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["kpax", "mps", "managed-print-services", "printer", "fleet", "api-client"],
+    "homepage": "https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/tree/main/php",
+    "authors": [{ "name": "BizReflex LLC-FZ" }],
+    "require": {
+        "php": ">=8.1",
+        "ext-json": "*"
+    },
+    "suggest": {
+        "ext-curl": "Required by the default CurlTransport"
+    },
+    "autoload": {
+        "psr-4": { "BizReflex\\Kpax\\": "src/" }
+    },
+    "scripts": {
+        "test": "php tests/run.php"
+    }
+}

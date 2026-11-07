@@ -1,7 +1,7 @@
 # KPAX API notes
 
 Facts about KPAX API v1 (as of KPAX 3.20) that shape
-how this library works.
+how the clients in this repository work.
 
 ## Endpoints and auth
 
@@ -21,7 +21,7 @@ sent as a Bearer token, but it cannot be refreshed.)
 Requested with the token, space-separated. **If the token lacks a scope an endpoint needs,
 KPAX returns 401, not 403.**
 
-Default (read-only) set used by this library:
+Default (read-only) set used by every client here:
 
 ```
 accounts:read agents:read devices:read hierarchy-elements:read dynamic-groups:read
@@ -39,7 +39,7 @@ only where needed.
 ## Hierarchy
 
 - Each API client is bound to a hierarchy level (an account).
-- To query below it, pass `parent_type` + `parent_id` (`scope` in this library). Both or neither.
+- To query below it, pass `parent_type` + `parent_id` (`scope` in the Node client, `parent_type`/`parent_id` arguments elsewhere). Both or neither.
 - `parent_type`: `account`, or `dynamic_group` on device endpoints (needs `dynamic-groups:read` too).
 - `GET /hierarchy-elements` returns the tree (accounts, agents, devices, dynamic groups).
 - 403 means the resource is outside the client's level.
@@ -63,5 +63,5 @@ only where needed.
 
 ## Updating the spec
 
-See [development.md](development.md#regenerating-types-after-a-kpax-upgrade). The spec itself is
-not redistributed here.
+See [openapi/README.md](../openapi/README.md). The spec itself is not redistributed here; only the
+Node package generates types from it.

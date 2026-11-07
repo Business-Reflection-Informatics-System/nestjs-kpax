@@ -1,6 +1,25 @@
-node_modules
-dist
-coverage
-*.tgz
 # KPAX's spec is not redistributed; see openapi/README.md
 openapi/*.json
+
+# Node
+node_modules/
+node/dist/
+*.tgz
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+python/build/
+python/dist/
+*.egg-info/
+.venv/
+
+# .NET
+dotnet/**/bin/
+dotnet/**/obj/
+*.nupkg
+
+# PHP
+php/vendor/
+php/build/

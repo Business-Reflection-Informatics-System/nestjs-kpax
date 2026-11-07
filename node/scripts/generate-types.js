@@ -3,8 +3,8 @@
 //
 // The spec is KPAX's documentation and is NOT committed to this repo. Download it
 // from your own instance while logged in:
-//   https://<instance>.kpax.cloud/api/docs?api-docs.json  ->  openapi/kpax-openapi.json
-// then run: npm run generate:types
+//   https://<instance>.kpax.cloud/api/docs?api-docs.json  ->  openapi/kpax-openapi.json (repo root)
+// then run (from node/): npm run generate:types
 //
 // Descriptions and examples from the spec are stripped from the output, so the
 // committed file contains type structure only.
@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..');
-const spec = process.argv[2] || path.join(root, 'openapi/kpax-openapi.json');
+const spec = process.argv[2] || path.join(root, '../openapi/kpax-openapi.json');
 const out = path.join(root, 'src/types/kpax-openapi.generated.ts');
 
 if (!fs.existsSync(spec)) {

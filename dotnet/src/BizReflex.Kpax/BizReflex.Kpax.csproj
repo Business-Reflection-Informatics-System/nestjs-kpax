@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RootNamespace>BizReflex.Kpax</RootNamespace>
+
+    <PackageId>BizReflex.Kpax</PackageId>
+    <Version>0.1.0</Version>
+    <Authors>BizReflex LLC-FZ</Authors>
+    <Company>BizReflex LLC-FZ</Company>
+    <Description>Client for the KPAX API v1: OAuth2 client credentials, retries and rate limits, pagination, device helpers. No dependencies.</Description>
+    <PackageTags>kpax;mps;managed-print-services;printer;fleet;api-client</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/tree/main/dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Business-Reflection-Informatics-System/nestjs-kpax</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Copyright>© 2026 BizReflex LLC-FZ</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <InternalsVisibleTo Include="BizReflex.Kpax.Tests" />
+  </ItemGroup>
+
+</Project>
