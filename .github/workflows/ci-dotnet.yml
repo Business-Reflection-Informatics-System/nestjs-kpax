@@ -1,0 +1,41 @@
+name: CI · .NET
+
+on:
+  push:
+    paths: ['dotnet/**', 'fixtures/**', '.github/workflows/ci-dotnet.yml']
+  pull_request:
+    paths: ['dotnet/**', 'fixtures/**', '.github/workflows/ci-dotnet.yml']
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: dotnet
+
+jobs:
+  test:
+    name: .NET ${{ matrix.dotnet }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dotnet: '8.0.x'
+            rollforward: ''
+          - dotnet: '10.0.x'      # net8.0 build running on the .NET 10 runtime
+            rollforward: Major
+    env:
+      DOTNET_ROLL_FORWARD: ${{ matrix.rollforward }}
+      DOTNET_NOLOGO: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            ${{ matrix.dotnet }}
+      - run: dotnet build BizReflex.Kpax.sln -c Release
+      - name: Tests (self-contained runner; exit code = failures)
+        run: dotnet run --project tests/BizReflex.Kpax.Tests -c Release --no-build
+      - run: dotnet pack src/BizReflex.Kpax -c Release --no-build -o out

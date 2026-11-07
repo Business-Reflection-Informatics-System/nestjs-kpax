@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ADFD71C5-039F-4447-93BE-BEDC403B9456}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizReflex.Kpax", "src\BizReflex.Kpax\BizReflex.Kpax.csproj", "{2BB29685-3F4F-4116-A43A-CEC9DE15C47B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{35940053-4198-4990-ACC1-FD6CFE0FBEE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BizReflex.Kpax.Tests", "tests\BizReflex.Kpax.Tests\BizReflex.Kpax.Tests.csproj", "{842F0B73-C8AF-4C1F-8BB7-493C99E8F429}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BB29685-3F4F-4116-A43A-CEC9DE15C47B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BB29685-3F4F-4116-A43A-CEC9DE15C47B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BB29685-3F4F-4116-A43A-CEC9DE15C47B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BB29685-3F4F-4116-A43A-CEC9DE15C47B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{842F0B73-C8AF-4C1F-8BB7-493C99E8F429}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{842F0B73-C8AF-4C1F-8BB7-493C99E8F429}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{842F0B73-C8AF-4C1F-8BB7-493C99E8F429}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{842F0B73-C8AF-4C1F-8BB7-493C99E8F429}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2BB29685-3F4F-4116-A43A-CEC9DE15C47B} = {ADFD71C5-039F-4447-93BE-BEDC403B9456}
+		{842F0B73-C8AF-4C1F-8BB7-493C99E8F429} = {35940053-4198-4990-ACC1-FD6CFE0FBEE9}
+	EndGlobalSection
+EndGlobal

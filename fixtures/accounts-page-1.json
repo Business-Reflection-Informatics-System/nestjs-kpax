@@ -1,0 +1,3 @@
+{ "data": [ { "id": 10, "parent_type": "account", "parent_id": 1, "name": "Head office", "activation_code": "AAAA1111" },
+            { "id": "11", "parent_type": "account", "parent_id": "1", "name": "Branch", "activation_code": "BBBB2222" } ],
+  "meta": { "current_page": 1, "last_page": 2, "per_page": 2, "total": 3, "from": 1, "to": 2 } }

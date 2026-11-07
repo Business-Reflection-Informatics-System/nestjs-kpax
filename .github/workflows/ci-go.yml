@@ -1,0 +1,33 @@
+name: CI · Go
+
+on:
+  push:
+    paths: ['go/**', 'fixtures/**', '.github/workflows/ci-go.yml']
+  pull_request:
+    paths: ['go/**', 'fixtures/**', '.github/workflows/ci-go.yml']
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: go
+
+jobs:
+  test:
+    name: Go ${{ matrix.go }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ['1.23', '1.24', 'stable']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version: ${{ matrix.go }}
+          cache: false
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - run: go vet ./...
+      - run: go test -race -count=1 ./...

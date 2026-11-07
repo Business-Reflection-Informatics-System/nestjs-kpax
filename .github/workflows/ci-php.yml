@@ -1,0 +1,36 @@
+name: CI · PHP
+
+on:
+  push:
+    paths: ['php/**', 'fixtures/**', '.github/workflows/ci-php.yml']
+  pull_request:
+    paths: ['php/**', 'fixtures/**', '.github/workflows/ci-php.yml']
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: php
+
+jobs:
+  test:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, json
+          tools: composer
+          coverage: none
+      - name: Lint
+        run: find src tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - run: composer validate --strict
+      - run: composer dump-autoload
+      - run: php tests/run.php

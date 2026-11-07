@@ -1,0 +1,2 @@
+{ "data": [ { "id": 12, "parent_type": "account", "parent_id": 1, "name": "Warehouse", "activation_code": "CCCC3333" } ],
+  "meta": { "current_page": 2, "last_page": 2, "per_page": 2, "total": 3, "from": 3, "to": 3 } }

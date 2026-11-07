@@ -1,0 +1,4 @@
+{ "data": [
+    { "id": 1, "parent_type": "account", "parent_id": 12, "profile_id": 3, "agent_id": 7, "manufacturer": "Kyocera", "manufacturer_origin": "KYOCERA", "model": "TASKalfa 2554ci", "model_origin": "TASKalfa 2554ci", "serial_number": "SN0000000001", "serial_number_origin": "SN0000000001", "mac_address": "00:11:22:33:44:01", "typology": "printer", "last_check": "2026-11-01 08:00:00", "created_at": "2025-01-01 00:00:00" },
+    { "id": 2, "parent_type": "account", "parent_id": 12, "manufacturer": "HP", "model": "LaserJet M507", "serial_number": "SN0000000002", "serial_number_origin": "SN0000000002", "last_check": "2026-11-01 08:05:00" } ],
+  "meta": { "current_page": 1, "last_page": 3, "per_page": 2, "total": 4 } }

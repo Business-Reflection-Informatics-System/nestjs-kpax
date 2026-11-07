@@ -1,0 +1,5 @@
+{ "data": [
+    { "id": 7, "serial_number": "ABCD123456789", "serial_number_origin": "ABCD123456789", "model": "TASKalfa 2554ci" },
+    { "id": 8, "serial_number": "ABCD1234567890", "serial_number_origin": "ABCD1234567890", "model": "TASKalfa 2554ci" },
+    { "id": 9, "serial_number": "OVERRIDDEN-9", "serial_number_origin": "XYZ987654321", "model": "LaserJet M507" } ],
+  "meta": { "current_page": 1, "last_page": 1, "per_page": 50, "total": 3 } }

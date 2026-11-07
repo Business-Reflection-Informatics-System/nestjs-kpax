@@ -1,12 +1,17 @@
-name: CI
+name: CI · Node
 
 on:
   push:
-    branches: [main]
+    paths: ['node/**', 'fixtures/**', '.github/workflows/ci-node.yml']
   pull_request:
+    paths: ['node/**', 'fixtures/**', '.github/workflows/ci-node.yml']
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    working-directory: node
 
 jobs:
   test:
@@ -19,20 +24,17 @@ jobs:
         nest: [9, 10]
     steps:
       - uses: actions/checkout@v5
-
       - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
           cache: npm
-
+          cache-dependency-path: node/package-lock.json
       - run: npm ci
-
       - name: Use NestJS ${{ matrix.nest }}
         if: matrix.nest == 10
         run: >
           npm install --no-save --no-audit --no-fund
           @nestjs/common@10 @nestjs/core@10 @nestjs/testing@10 @nestjs/platform-express@10
-
       - run: npm run typecheck
       - run: npm run lint
       - run: npm test
@@ -48,6 +50,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: node/package-lock.json
       - run: npm ci
       - run: npm pack
       - name: Tarball must contain dist and must not contain the KPAX spec
@@ -56,4 +59,5 @@ jobs:
           tar tzf bizreflex-nestjs-kpax-*.tgz > files.txt
           grep -q '^package/dist/index.js$' files.txt
           grep -q '^package/dist/index.d.ts$' files.txt
+          grep -q '^package/LICENSE$' files.txt
           if grep -q 'kpax-openapi.json' files.txt; then echo "spec must not be packed"; exit 1; fi

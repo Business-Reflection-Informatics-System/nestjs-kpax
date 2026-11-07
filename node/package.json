@@ -14,10 +14,11 @@
   ],
   "author": "BizReflex LLC-FZ",
   "license": "MIT",
-  "homepage": "https://github.com/Business-Reflection-Informatics-System/nestjs-kpax#readme",
+  "homepage": "https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/tree/main/node#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Business-Reflection-Informatics-System/nestjs-kpax.git"
+    "url": "git+https://github.com/Business-Reflection-Informatics-System/nestjs-kpax.git",
+    "directory": "node"
   },
   "bugs": {
     "url": "https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/issues"

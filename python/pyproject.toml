@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bizreflex-kpax"
+version = "0.1.0"
+description = "Client for the KPAX API v1: OAuth2 client credentials, retries and rate limits, pagination, device helpers."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "BizReflex LLC-FZ" }]
+requires-python = ">=3.9"
+dependencies = ["httpx>=0.24,<1"]
+keywords = ["kpax", "mps", "managed-print-services", "printer", "fleet", "api-client"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/tree/main/python"
+Issues = "https://github.com/Business-Reflection-Informatics-System/nestjs-kpax/issues"
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.4", "mypy>=1.8"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kpax"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]
+ignore = ["E501", "UP006", "UP007", "UP035", "UP045", "RUF022"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src/kpax"]
