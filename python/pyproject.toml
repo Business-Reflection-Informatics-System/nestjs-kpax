@@ -9,7 +9,7 @@ description = "Client for the KPAX API v1: OAuth2 client credentials, retries an
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [{ name = "BizReflex LLC-FZ" }]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = ["httpx>=0.24,<1"]
 keywords = ["kpax", "mps", "managed-print-services", "printer", "fleet", "api-client"]
 classifiers = [
@@ -33,7 +33,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]

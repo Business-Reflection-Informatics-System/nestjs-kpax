@@ -6,7 +6,7 @@ languages, maintained by [BizReflex](https://github.com/Business-Reflection-Info
 | Language | Package | Folder | Highlights |
 |---|---|---|---|
 | Node / **NestJS** | `@bizreflex/nestjs-kpax` | [`node/`](node) | Nest module, DB-backed registry of KPAX connections that change at runtime, typed `call()` over every endpoint |
-| **Python** 3.9+ | `bizreflex-kpax` | [`python/`](python) | `httpx`, thread-safe, typed |
+| **Python** 3.10+ | `bizreflex-kpax` | [`python/`](python) | `httpx`, thread-safe, typed |
 | **Go** 1.23+ | `github.com/Business-Reflection-Informatics-System/nestjs-kpax/go` | [`go/`](go) | stdlib only, `context`, range-over-func iterators |
 | **.NET** 8+ | `BizReflex.Kpax` | [`dotnet/`](dotnet) | no dependencies, async, `IAsyncEnumerable` |
 | **PHP** 8.1+ | `bizreflex/kpax` | [`php/`](php) | no Composer dependencies, pluggable transport, generators |

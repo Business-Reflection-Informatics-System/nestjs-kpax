@@ -1,7 +1,7 @@
 # bizreflex-kpax (Python)
 
 Python client for the **KPAX API v1**: OAuth2 client credentials, retries and rate limits,
-pagination, typed models and device helpers. One dependency: `httpx`. Python 3.9+.
+pagination, typed models and device helpers. One dependency: `httpx`. Python 3.10+.
 
 ```python
 from kpax import KpaxClient
