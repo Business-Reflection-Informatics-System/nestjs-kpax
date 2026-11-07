@@ -1,0 +1,6 @@
+node_modules
+dist
+coverage
+*.tgz
+# KPAX's spec is not redistributed; see openapi/README.md
+openapi/*.json
